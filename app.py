@@ -59,4 +59,4 @@ def convert_video_to_audio():
     return send_file(audio_path, as_attachment=True)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=False, host='0.0.0.0')
