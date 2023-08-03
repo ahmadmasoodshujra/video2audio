@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converter</title>
+    <link rel="icon" href="../static/favicon.ico?v2">
+        <style>
+        body {
+            font-family: sans-serif;
+            background-color: #34495e; /* Dark gray background color */
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background-image: linear-gradient(45deg, #e74c3c, #3498db); /* Red to Blue gradient background */
+            position: relative;
+            padding-top: 50px; /* Add some space at the top */
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 5em; /* Increase the font size */
+            margin-top: 10px; /* Reduce the top margin */
+            margin-bottom: 0; /* Remove the bottom margin */
+            background: linear-gradient(45deg, #ff7675, #fd79a8, #dfe6e9, #0984e3, #00cec9, #55efc4, #81ecec, #6c5ce7, #a29bfe, #fdcb6e, #e17055); /* Multi-color "Converter" */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px; /* Add some letter spacing for better visibility */
+        }
+
+        .convert-text {
+            color: #fff;
+            font-size: 1.5em; /* Increase the font size and make it more visible */
+            margin-top: -10px; /* Overlap the text slightly */
+        }
+
+        form {
+            margin-top: 20px; /* Reduce the top margin */
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        .progress-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-bottom: 20px; /* Add margin between progress bar and Convert button */
+        }
+
+        #progress {
+            width: 80%; /* Horizontally smaller progress bar */
+            height: 10px; /* Smaller progress bar height */
+            background-color: #ddd;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            background: linear-gradient(to right, #3498db, #ff7675); /* Gradient from blue to pink */
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        #download {
+            display: none;
+        }
+
+        a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #2ecc71; /* Green button color */
+            font-size: 1.5em;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+
+        a:hover {
+            background-color: #27ae60; /* Darker green on hover */
+            color: #fff;
+            transform: scale(1.1); /* Increase the size on hover */
+        }
+
+        .convert-button {
+            color: #000;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #f39c12; /* Yellow button color */
+            font-size: 1.5em;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+
+        .convert-button:hover {
+            background-color: #d35400; /* Darker orange on hover */
+            color: #fff;
+            transform: scale(1.1); /* Increase the size on hover */
+        }
+
+        .horizontal-line {
+            display: none; /* Remove the horizontal line */
+        }
+
+        .wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, #e74c3c, #3498db); /* Red to Blue gradient background for waves */
+            animation: wave 2s linear;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .video-icon {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #ff7675;
+            border-radius: 50%;
+            display: none;
+            animation: videoIconAnimation 2s infinite;
+        }
+
+        .audio-icon {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #fd79a8;
+            border-radius: 50%;
+            display: none;
+            animation: audioIconAnimation 2s infinite;
+        }
+
+        @keyframes videoIconAnimation {
+            0%, 100% {
+                opacity: 0;
+                transform: translate(0, 0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(100px, -100px);
+            }
+        }
+
+        @keyframes audioIconAnimation {
+            0%, 100% {
+                opacity: 0;
+                transform: translate(0, 0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-100px, 100px);
+            }
+        }
+        .inactive-button {
+            opacity: 0.5; /* Reduce opacity to make it dim */
+            cursor: not-allowed; /* Change cursor to indicate the button is inactive */
+        }
+
+        .creator-text {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: #fff;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conv<span style="color: #f1c40f;">er</span>ter</h1>
+        <p class="convert-text">Convert your video to audio</p>
+        <form action="/convert" method="post" enctype="multipart/form-data">
+            <input type="file" name="video" id="video" accept="video/*,.ts" /> <!-- Updated: Accept ".ts" files -->
+            <div class="progress-container">
+                <div id="progress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+            <!-- Updated: Convert button with inactive state -->
+            <input type="submit" value="Convert & Download" class="convert-button inactive-button" disabled />
+            <!-- Updated: Download link -->
+            <a href="#" id="download" style="display: none;"></a>
+        </form>
+        <div class="wave"></div>
+    </div>
+    <div class="video-icon"></div>
+    <div class="audio-icon"></div>
+
+    <!-- Added the creator text here -->
+    <div class="creator-text">Developer: Ahmad Masood Shujra</div>
+    <script>
+        var progressBar = document.querySelector(".progress-bar");
+        var convertButton = document.querySelector(".convert-button");
+        var downloadLink = document.getElementById("download");
+
+        function animateProgressBar(progress) {
+            progressBar.style.width = progress + "%";
+        }
+
+        function handleProgress(e) {
+            var progress = (e.loaded / e.total) * 100;
+            animateProgressBar(progress);
+        }
+
+        function handleUploadComplete() {
+            animateProgressBar(100);
+            convertButton.classList.remove("inactive-button"); // Remove the inactive-button class to enable the button
+            convertButton.removeAttribute("disabled");
+        }
+
+        document.getElementById("video").addEventListener("change", function () {
+            var file = this.files[0];
+            var reader = new FileReader();
+            reader.addEventListener("progress", handleProgress);
+            reader.addEventListener("load", handleUploadComplete);
+            reader.readAsDataURL(file);
+        });
+
+        // Add event listener to form submission to hide the download link after form submit
+        document.querySelector("form").addEventListener("submit", function () {
+            downloadLink.style.display = "none";
+        });
+
+        // Add event listener to the convertButton to show download link after the conversion is complete
+        convertButton.addEventListener("click", function () {
+            downloadLink.style.display = "block";
+        });
+
+        window.onload = function() {
+            var waves = document.querySelectorAll(".wave");
+            for (var i = 0; i < waves.length; i++) {
+                waves[i].addEventListener("animationend", function() {
+                    this.remove(); // Remove the wave after the animation is completed
+                });
+            }
+
+            // Animation for the video and audio icons
+            var videoIcon = document.querySelector(".video-icon");
+            var audioIcon = document.querySelector(".audio-icon");
+
+            setInterval(function() {
+                var containerRect = document.querySelector(".container").getBoundingClientRect();
+                var randomX = Math.floor(Math.random() * (containerRect.width - 50));
+                var randomY = Math.floor(Math.random() * (containerRect.height - 50));
+
+                videoIcon.style.left = randomX + "px";
+                videoIcon.style.top = randomY + "px";
+                videoIcon.style.display = "block";
+
+                randomX = Math.floor(Math.random() * (containerRect.width - 50));
+                randomY = Math.floor(Math.random() * (containerRect.height - 50));
+
+                audioIcon.style.left = randomX + "px";
+                audioIcon.style.top = randomY + "px";
+                audioIcon.style.display = "block";
+            }, 2000); // Repeat the animation every 2 seconds
+        };
+    </script>
+</body>
+</html>
